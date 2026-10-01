@@ -1,3 +1,36 @@
+# %%Masques binaires : poids bleus et pois rouges
+# import cv2 as cv
+# import numpy as np
+img = cv.imread("Images/petitsPois.png", cv.IMREAD_COLOR)
+if img is None:
+    raise FileNotFoundError("Impossible de charger Images/petitsPois.png")
+img_hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+
+masque_poids_bleus = cv.inRange(
+    img_hsv,
+    np.array([100, 120, 50]),
+    np.array([130, 255, 255]),
+)
+masque_pois_rouges = cv.bitwise_or(
+    cv.inRange(img_hsv, np.array([0, 120, 50]), np.array([10, 255, 255])),
+    cv.inRange(img_hsv, np.array([170, 120, 50]), np.array([180, 255, 255])),
+)
+
+noyau = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
+masque_poids_bleus = cv.morphologyEx(masque_poids_bleus, cv.MORPH_OPEN, noyau)
+masque_poids_bleus = cv.morphologyEx(masque_poids_bleus, cv.MORPH_CLOSE, noyau)
+masque_pois_rouges = cv.morphologyEx(masque_pois_rouges, cv.MORPH_OPEN, noyau)
+masque_pois_rouges = cv.morphologyEx(masque_pois_rouges, cv.MORPH_CLOSE, noyau)
+
+if not cv.imwrite("poids_bleus.png", masque_poids_bleus):
+    raise OSError("Impossible d'enregistrer poids_bleus.png")
+if not cv.imwrite("pois_rouges.png", masque_pois_rouges):
+    raise OSError("Impossible d'enregistrer pois_rouges.png")
+
+cv.imshow("Poids bleus - masque binaire", masque_poids_bleus)
+cv.imshow("Pois rouges - masque binaire", masque_pois_rouges)
+cv.waitKey(0)
+cv.destroyAllWindows()
 
 #%%Ouverture + affichage image
 from tkinter import Tk     #pip install tk
